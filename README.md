@@ -9,14 +9,14 @@ When accessed over HTTP, it generates a response based on the supplied query par
     size  - Count of bytes to send after sleep
     count - Count of sleep+send cycles
 
-Which are used according to the following:
+All values are assumed to be 0 if not set. If either ```sleep``` or ```size``` are greater than 0, count is set to at least 1.
+
+Which are used according to the following pseudo-code:
 
 * Write ```first``` random bytes
 * Loop ```count``` times, each loop doing:
   * Delay for ```sleep``` milliseconds
   * Write ```size``` random bytes
-
-If either ```sleep``` or ```size``` are greater than 0, count is set to at least 1.
 
 For example, accessing ```http://localhost/?first=1000&sleep=250&size=128&count=5``` will write ```1000``` random bytes, and loop ```5``` times that each: sleep ```250ms``` and write ```128``` bytes.
 
