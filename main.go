@@ -28,6 +28,9 @@ func main() {
 func serveHttps() {
 	https := http.NewServeMux()
 	https.HandleFunc("/", handler)
-	whitelist := strings.Split(*hostnames, ",")
+	whitelist := []string{}
+	if *hostnames != "" {
+		whitelist = strings.Split(*hostnames, ",")
+	}
 	log.Fatal(http.Serve(autocert.NewListener(whitelist...), https))
 }
