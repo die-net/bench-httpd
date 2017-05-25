@@ -1,0 +1,19 @@
+sudo: false
+dist: trusty
+
+language: go
+
+matrix:
+  include:
+  - go: 1.5.4
+  - go: 1.6.4
+  - go: 1.7.6
+  - go: 1.8.3
+
+install:
+  - # Do nothing.
+
+script:
+  - go get -t -v ./...
+  - diff -u <(echo -n) <(gofmt -d -s .)
+  - go tool vet -structtags=false .
