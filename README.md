@@ -22,7 +22,7 @@ For example, accessing ```http://localhost/?first=1000&sleep=250&size=128&count=
 
 ### Building
 
-If you haven't used Go before (assuming you are on a Mac):
+Install and set up Go 1.7 or later. If you haven't used Go before (assuming you are on a Mac):
 
     brew install go
     mkdir -p $HOME/go/src
