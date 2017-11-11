@@ -6,7 +6,8 @@ language: go
 matrix:
   include:
   - go: 1.7.6
-  - go: 1.8.3
+  - go: 1.8.5
+  - go: 1.9.2
 
 install:
   - # Do nothing.
