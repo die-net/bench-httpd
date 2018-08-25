@@ -59,7 +59,7 @@ func writeRand(w http.ResponseWriter, n int) error {
 	if _, err := rand.Read(b); err != nil {
 		return err
 	}
-	if _, err := w.Write([]byte(b)); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return err
 	}
 

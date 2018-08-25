@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	enableHttps = flag.Bool("enable-https", false, "Enable listening on port 443 for HTTPS connections and fetching of LetsEncrypt certificates")
+	enableHTTPS = flag.Bool("enable-https", false, "Enable listening on port 443 for HTTPS connections and fetching of LetsEncrypt certificates")
 	hostnames   = flag.String("hostnames", "", "A comma-separated whitelist of domains to try asking LetsEncrypt for an TLS cert (unset = any)")
 	listen      = flag.String("listen", ":80", "[IP]:port to listen for HTTP connections.")
 )
@@ -17,15 +17,15 @@ var (
 func main() {
 	flag.Parse()
 
-	if *enableHttps {
-		go serveHttps()
+	if *enableHTTPS {
+		go serveHTTPS()
 	}
 
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(*listen, nil))
 }
 
-func serveHttps() {
+func serveHTTPS() {
 	https := http.NewServeMux()
 	https.HandleFunc("/", handler)
 	whitelist := []string{}
