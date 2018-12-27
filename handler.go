@@ -56,7 +56,7 @@ func writeRand(w http.ResponseWriter, n int) error {
 	}
 
 	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
+	if _, err := rand.Read(b); err != nil { //nolint:gosec
 		return err
 	}
 	if _, err := w.Write(b); err != nil {
