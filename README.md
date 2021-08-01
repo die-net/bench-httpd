@@ -1,4 +1,4 @@
-# bench-httpd
+# bench-httpd [![Build Status](https://github.com/die-net/bench-httpd/actions/workflows/go-test.yml/badge.svg)](https://github.com/die-net/bench-httpd/actions/workflows/go-test.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/die-net/bench-httpd)](https://goreportcard.com/report/github.com/die-net/bench-httpd)
 
 A tiny Go-based httpd server suitable for calibrating benchmarks and some networking testing.
 
