@@ -11,7 +11,7 @@ import (
 
 var (
 	enableHTTPS = flag.Bool("enable-https", false, "Enable listening on port 443 for HTTPS connections and fetching of LetsEncrypt certificates")
-	hostnames   = flag.String("hostnames", "", "A comma-separated whitelist of domains to try asking LetsEncrypt for an TLS cert (unset = any)")
+	hostnames   = flag.String("hostnames", "", "A comma-separated allowlist of domains to try asking LetsEncrypt for an TLS cert (unset = any)")
 	listen      = flag.String("listen", ":80", "[IP]:port to listen for HTTP connections.")
 )
 
@@ -29,9 +29,9 @@ func main() {
 func serveHTTPS() {
 	https := http.NewServeMux()
 	https.HandleFunc("/", handler)
-	whitelist := []string{}
+	allowlist := []string{}
 	if *hostnames != "" {
-		whitelist = strings.Split(*hostnames, ",")
+		allowlist = strings.Split(*hostnames, ",")
 	}
-	log.Fatal(http.Serve(autocert.NewListener(whitelist...), https))
+	log.Fatal(http.Serve(autocert.NewListener(allowlist...), https))
 }
