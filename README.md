@@ -22,7 +22,7 @@ For example, accessing ```http://localhost/?first=1000&sleep=250&size=128&count=
 
 ### Building
 
-Install and set up Go 1.7 or later. If you haven't used Go before (assuming you are on a Mac):
+Install and set up Go 1.17 or later. If you haven't used Go before (assuming you are on a Mac):
 
     brew install go
     mkdir -p $HOME/go/src
@@ -30,7 +30,7 @@ Install and set up Go 1.7 or later. If you haven't used Go before (assuming you 
 
 Then to fetch the code and its dependencies and build the binary:
 
-    go get -u -t github.com/die-net/bench-httpd
+    go install github.com/die-net/bench-httpd@latest
 
 The binary is now available as: ```$HOME/go/bin/bench-httpd```
 
@@ -47,7 +47,7 @@ Where ```[flags]``` are any of:
     -enable-https
         Enabling listening on port 443 for HTTPS connections and fetching of Let's Encrypt certificates
     -hostnames string
-        A comma-separated whitelist of hostnames to try asking Let's Encrypt for a TLS cert (unset = any)
+        A comma-separated allowlist of hostnames to try asking Let's Encrypt for a TLS cert (unset = any)
     -listen string
         [IP]:port to listen for HTTP connections. (default ":80")
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 
 var (
 	cacheControl = flag.String("cache-control", "private,no-cache,max-age=0", "The Cache-Control header to return for all responses.")
-	contentType  = flag.String("content-type", "text/plain", "The Content-Type to return for all responses.")
+	contentType  = flag.String("content-type", "binary/octet-stream", "The Content-Type to return for all responses.")
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -25,18 +26,40 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if count <= 0 && (sleep > 0 || size > 0) {
 		count = 1
 	}
+	total := first + count*size
 
-	w.Header().Set("Content-Type", *contentType)
 	w.Header().Set("Cache-Control", *cacheControl)
+	w.Header().Set("Content-Length", strconv.Itoa(total))
+	w.Header().Set("Content-Type", *contentType)
 	w.WriteHeader(http.StatusOK)
 
 	if writeRand(w, first) != nil {
 		return
 	}
 
+	var ch <-chan time.Time
+	if sleep > 0 {
+		t := time.NewTicker(sleep)
+		defer t.Stop() // Avoid leaking the ticker.
+
+		ch = t.C
+	} else {
+		// closed channels are always ready, which will behave like
+		// a zero delay.
+		cc := make(chan time.Time)
+		close(cc)
+
+		ch = cc
+	}
+
+	ctx := r.Context()
 	for i := 0; i < count; i++ {
-		time.Sleep(sleep)
-		if writeRand(w, size) != nil {
+		select {
+		case <-ch:
+			if writeRand(w, size) != nil {
+				return
+			}
+		case <-ctx.Done():
 			return
 		}
 	}
@@ -45,21 +68,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 // formInt returns the integer value of a http.request form parameter, or 0
 // if the parmeter is missing or not a number.
 func formInt(r *http.Request, param string) int {
-	v, _ := strconv.Atoi(r.FormValue(param))
-	return v
+	if v, _ := strconv.Atoi(r.FormValue(param)); v > 0 && v <= 1000000000 {
+		return v
+	}
+	return 0
 }
 
 // writeRand writes n random bytes to w then flushes the result.
 func writeRand(w http.ResponseWriter, n int) error {
-	if n <= 0 {
-		return nil
-	}
-
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return err
-	}
-	if _, err := w.Write(b); err != nil {
+	// Copy n bytes from rand.Read to w without allocating.
+	if _, err := io.CopyN(w, readerFunc(rand.Read), int64(n)); err != nil {
 		return err
 	}
 
@@ -68,4 +86,11 @@ func writeRand(w http.ResponseWriter, n int) error {
 	}
 
 	return nil
+}
+
+// readerFunc is a function type that implements io.Reader
+type readerFunc func(p []byte) (n int, err error)
+
+func (r readerFunc) Read(p []byte) (n int, err error) {
+	return r(p)
 }
