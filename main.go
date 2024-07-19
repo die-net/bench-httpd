@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"log"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -18,20 +20,41 @@ var (
 func main() {
 	flag.Parse()
 
+	m := http.NewServeMux()
+	m.HandleFunc("/", handler)
+
 	if *enableHTTPS {
-		go serveHTTPS()
+		go serveHTTPS(m)
 	}
 
-	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(*listen, nil))
+	serveHTTP(m)
 }
 
-func serveHTTPS() {
-	https := http.NewServeMux()
-	https.HandleFunc("/", handler)
+func serveHTTP(handler http.Handler) {
+	l, err := net.Listen("tcp", *listen)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	log.Fatal(serve(l, handler))
+}
+
+func serveHTTPS(handler http.Handler) {
 	allowlist := []string{}
 	if *hostnames != "" {
 		allowlist = strings.Split(*hostnames, ",")
 	}
-	log.Fatal(http.Serve(autocert.NewListener(allowlist...), https))
+
+	log.Fatal(serve(autocert.NewListener(allowlist...), handler))
+}
+
+func serve(l net.Listener, handler http.Handler) error {
+	s := &http.Server{
+		Handler:           handler,
+		ReadTimeout:       10 * time.Minute,
+		WriteTimeout:      10 * time.Minute,
+		ReadHeaderTimeout: 20 * time.Second,
+	}
+
+	return s.Serve(l)
 }
